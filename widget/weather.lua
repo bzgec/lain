@@ -46,6 +46,7 @@ local function factory(args)
     local followtag             = args.followtag or false
     local showpopup             = args.showpopup or "on"
     local settings              = args.settings or function() end
+    local weather_current       = {status = "NA"}
 
     weather.widget:set_markup(weather_na_markup)
     weather.icon_path = icons_path .. "na.png"
@@ -87,6 +88,19 @@ local function factory(args)
         end)
     end
 
+    function weather.notification_currentWeather()
+        if weather_current["status"] == "OK" then
+            weather.notification_text = string.format("<b>%s</b>\n- Temp: %0.1f°C\n- Feels like: %0.1f°C\n- Pressure: %d\n- Humidity: %d%%\n",
+                weather_current.name,
+                weather_current.temp,
+                weather_current.feels_like,
+                weather_current.pressure,
+                weather_current.humidity)
+        else
+            weather.notification_text = ""
+        end
+    end
+
     function weather.forecast_update()
         local cmd = string.format(forecast_call, city_id, units, lang, APPID)
         helpers.async(cmd, function(f)
@@ -94,7 +108,7 @@ local function factory(args)
             weather_now, _, err = json.decode(f, 1, nil)
 
             if not err and type(weather_now) == "table" and tonumber(weather_now["cod"]) == 200 then
-                weather.notification_text = ""
+                weather.notification_currentWeather()
                 for i = 1, weather_now["cnt"], weather_now["cnt"]//cnt do
                     weather.notification_text = weather.notification_text ..
                                                 notification_text_fun(weather_now["list"][i])
@@ -126,10 +140,21 @@ local function factory(args)
 
                 weather.icon_path = icons_path .. icon .. ".png"
                 widget = weather.widget
+
+                weather_current.status = "OK"
+                weather_current.name = weather_now["name"]
+                weather_current.temp = weather_now["main"]["temp"]
+                weather_current.feels_like = weather_now["main"]["feels_like"]
+                weather_current.temp_min = weather_now["main"]["temp_min"]
+                weather_current.temp_max = weather_now["main"]["temp_max"]
+                weather_current.pressure = weather_now["main"]["pressure"]
+                weather_current.humidity = weather_now["main"]["humidity"]
+
                 settings()
             else
                 weather.icon_path = icons_path .. "na.png"
                 weather.widget:set_markup(weather_na_markup)
+                weather.weather_current = {status = "NA"}
             end
 
             weather.icon:set_image(weather.icon_path)
