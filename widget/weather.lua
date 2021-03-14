@@ -90,8 +90,9 @@ local function factory(args)
 
     function weather.notification_currentWeather()
         if weather_current["status"] == "OK" then
-            weather.notification_text = string.format("<b>%s</b>\n- Temp: %0.1f°C\n- Feels like: %0.1f°C\n- Pressure: %d\n- Humidity: %d%%\n",
+            weather.notification_text = string.format("<b>%s</b>\n- %s\n- Temp: %0.1f°C\n- Feels like: %0.1f°C\n- Pressure: %d\n- Humidity: %d%%\n",
                 weather_current.name,
+                weather_current.description,
                 weather_current.temp,
                 weather_current.feels_like,
                 weather_current.pressure,
@@ -149,6 +150,7 @@ local function factory(args)
                 weather_current.temp_max = weather_now["main"]["temp_max"]
                 weather_current.pressure = weather_now["main"]["pressure"]
                 weather_current.humidity = weather_now["main"]["humidity"]
+                weather_current.description = weather_now["weather"][1]["description"]:lower()
 
                 settings()
             else
