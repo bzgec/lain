@@ -23,7 +23,7 @@ local function factory(args)
     alsa.cmd           = args.cmd or "amixer"
     alsa.channel       = args.channel or "Master"
     alsa.togglechannel = args.togglechannel
-    alsa.pressed  = args.pressed or function(button) end
+    alsa.pressed       = args.pressed or function(button) end
 
 
     local format_cmd = string.format("%s get %s", alsa.cmd, alsa.channel)
